@@ -24,6 +24,8 @@ public class RpcResponse<T> {
     private boolean success;
 
 
+    private Exception exception;
+
     /**
      * 返回数据
      */
@@ -35,5 +37,9 @@ public class RpcResponse<T> {
 
     public static RpcResponse fail(String errorMsg) {
         return RpcResponse.builder().code(-1).success(false).data(errorMsg).build();
+    }
+
+    public static RpcResponse fail(Exception exception) {
+        return RpcResponse.builder().code(-1).success(false).data(exception.getMessage()).exception(exception).build();
     }
 }

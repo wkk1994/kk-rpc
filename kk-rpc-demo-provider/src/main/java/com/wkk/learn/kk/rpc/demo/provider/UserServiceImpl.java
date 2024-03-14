@@ -15,6 +15,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(Integer id) {
+        if(id == 404) {
+            throw new RuntimeException("Not Found");
+        }
         return new User(id, "KK-" + System.currentTimeMillis());
     }
 }

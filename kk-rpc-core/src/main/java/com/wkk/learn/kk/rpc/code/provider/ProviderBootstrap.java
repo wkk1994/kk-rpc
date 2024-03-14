@@ -48,8 +48,10 @@ public class ProviderBootstrap implements ApplicationContextAware {
             method = getMethodByName(bean.getClass(), request.getMethod());
             invoke = method.invoke(bean, request.getArgs());
             return RpcResponse.success(invoke);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            return RpcResponse.fail(e.getMessage());
+        } catch (InvocationTargetException e) {
+            return RpcResponse.fail((Exception) e.getTargetException());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
