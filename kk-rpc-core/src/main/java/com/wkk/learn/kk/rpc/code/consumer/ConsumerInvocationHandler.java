@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wkk.learn.kk.rpc.code.RpcRequest;
 import com.wkk.learn.kk.rpc.code.RpcResponse;
+import com.wkk.learn.kk.rpc.code.meta.MethodDesc;
+import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +48,7 @@ public class ConsumerInvocationHandler implements InvocationHandler {
 
     private RpcResponse post(Method method, Object[] args) throws IOException {
         RpcRequest rpcRequest = new RpcRequest();
-        rpcRequest.setMethod(method.getName());
+        rpcRequest.setMethodSign(MethodUtil.getMethodSign(method));
         rpcRequest.setArgs(args);
         rpcRequest.setService(service.getCanonicalName());
         Request request = new Request.Builder()

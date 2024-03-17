@@ -43,7 +43,7 @@ public class KkRpcDemoProviderApplication {
     }
 
 
-    @Bean
+    /*@Bean
     ApplicationRunner getRunner() {
         RpcRequest request = new RpcRequest();
         request.setArgs(new Object[]{100});
@@ -53,5 +53,5 @@ public class KkRpcDemoProviderApplication {
             RpcResponse rpcResponse = this.invoke(request);
             System.out.println("return : " + rpcResponse.getData());
         };
-    }
+    }*/
 }

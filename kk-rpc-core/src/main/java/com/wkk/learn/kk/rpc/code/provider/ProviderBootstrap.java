@@ -3,6 +3,9 @@ package com.wkk.learn.kk.rpc.code.provider;
 import com.wkk.learn.kk.rpc.code.RpcRequest;
 import com.wkk.learn.kk.rpc.code.RpcResponse;
 import com.wkk.learn.kk.rpc.code.annotation.KkProvider;
+import com.wkk.learn.kk.rpc.code.meta.MethodDesc;
+import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
+import com.wkk.learn.kk.rpc.code.meta.ServiceDesc;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    private Map<String, Object> skeleton = new HashMap<>();
+    private Map<String, ServiceDesc> skeleton = new HashMap<>();
 
     /**
      * 构建生产者
@@ -36,30 +39,32 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     public void getInterfaces(Object object) {
         for (Class anInterface : object.getClass().getInterfaces()) {
-            skeleton.put(anInterface.getCanonicalName(), object);
+            ServiceDesc serviceDesc = new ServiceDesc(object, anInterface);
+            skeleton.put(serviceDesc.getServiceName(), serviceDesc);
         }
     }
 
     public RpcResponse invokeRequest(RpcRequest request) {
-        Object bean = skeleton.get(request.getService());
-        Method method = null;
+        ServiceDesc serviceDesc = skeleton.get(request.getService());
+        if(serviceDesc == null) {
+            return RpcResponse.fail("Not Found Service");
+        }
         Object invoke = null;
         try {
-            method = getMethodByName(bean.getClass(), request.getMethod());
-            invoke = method.invoke(bean, request.getArgs());
+            MethodDesc methodDesc = serviceDesc.getMethods().get(request.getMethodSign());
+            if(methodDesc == null) {
+                return RpcResponse.fail("Not Found Method");
+            }
+            invoke = methodDesc.getMethod().invoke(serviceDesc.getService(), request.getArgs());
             return RpcResponse.success(invoke);
         } catch (InvocationTargetException e) {
             return RpcResponse.fail((Exception) e.getTargetException());
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            return RpcResponse.fail(e);
         }
     }
 
-    private Method getMethodByName(Class classz, String methodName) {
-        return Arrays.stream(classz.getMethods()).filter(value -> value.getName().equals(methodName)).findAny().get();
-    }
 
-    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }

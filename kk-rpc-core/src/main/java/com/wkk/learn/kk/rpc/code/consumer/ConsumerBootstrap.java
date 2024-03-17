@@ -29,7 +29,6 @@ public class ConsumerBootstrap implements ApplicationContextAware {
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         Arrays.stream(beanDefinitionNames).forEach(beanDefinitionName -> {
             Object bean = applicationContext.getBean(beanDefinitionName);
-            log.info(beanDefinitionName);
             List<Field> fieldList = findConsumerField(bean.getClass());
             if(CollectionUtils.isEmpty(fieldList)) {
                 return;

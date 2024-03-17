@@ -8,4 +8,7 @@ package com.wkk.demo.kk.rpc.api;
 public interface UserService {
 
     User findById(Integer id);
+    User findById(int id, String name);
+
+    User findById(long id, String name);
 }
