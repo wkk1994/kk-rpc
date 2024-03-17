@@ -4,17 +4,14 @@ import com.wkk.learn.kk.rpc.code.RpcRequest;
 import com.wkk.learn.kk.rpc.code.RpcResponse;
 import com.wkk.learn.kk.rpc.code.annotation.KkProvider;
 import com.wkk.learn.kk.rpc.code.meta.MethodDesc;
-import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
 import com.wkk.learn.kk.rpc.code.meta.ServiceDesc;
+import com.wkk.learn.kk.rpc.code.meta.TypeUtil;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +52,14 @@ public class ProviderBootstrap implements ApplicationContextAware {
             if(methodDesc == null) {
                 return RpcResponse.fail("Not Found Method");
             }
-            invoke = methodDesc.getMethod().invoke(serviceDesc.getService(), request.getArgs());
+            Object[] argTarget = null;
+            if(request.getArgs() != null) {
+                argTarget = new Object[request.getArgs().length];
+                for (int i = 0; i < request.getArgs().length; i++) {
+                    argTarget[i] = TypeUtil.cast(request.getArgs()[i], methodDesc.getMethod().getParameterTypes()[i]);
+                }
+            }
+            invoke = methodDesc.getMethod().invoke(serviceDesc.getService(), argTarget);
             return RpcResponse.success(invoke);
         } catch (InvocationTargetException e) {
             return RpcResponse.fail((Exception) e.getTargetException());

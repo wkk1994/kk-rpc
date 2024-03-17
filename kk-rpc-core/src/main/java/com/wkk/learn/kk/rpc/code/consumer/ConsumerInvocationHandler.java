@@ -6,6 +6,7 @@ import com.wkk.learn.kk.rpc.code.RpcRequest;
 import com.wkk.learn.kk.rpc.code.RpcResponse;
 import com.wkk.learn.kk.rpc.code.meta.MethodDesc;
 import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
+import com.wkk.learn.kk.rpc.code.meta.TypeUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +40,16 @@ public class ConsumerInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RpcResponse post = post(method, args);
         if(post.isSuccess()) {
-            JSONObject jsonObject = (JSONObject) post.getData();
-            return jsonObject.toJavaObject(method.getReturnType());
+            Object data = post.getData();
+            try {
+                if(data instanceof JSONObject) {
+                    return ((JSONObject) data).toJavaObject(method.getReturnType());
+                }else {
+                    return TypeUtil.cast(data, method.getReturnType());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         log.error("invoke error", post.getException());
         throw post.getException();

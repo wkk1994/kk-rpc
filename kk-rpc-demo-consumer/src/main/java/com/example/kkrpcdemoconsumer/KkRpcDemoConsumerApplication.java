@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Import(ConsumerConfig.class)
 @SpringBootApplication
 @Component
@@ -40,6 +42,16 @@ public class KkRpcDemoConsumerApplication {
             log.info("findById: {}", user2);
             Order order = orderService.findById(123);
             log.info("findById: {}", order);
+            log.info("findByLong: {}", userService.findByLong());
+            log.info("findByLongI: {}", userService.findByLongI());
+            log.info("findByInteger: {}", userService.findByInteger());
+            log.info("findByListInt: {}", userService.findByListInt());
+            log.info("findByIntArr: {}", userService.findByIntArr());
+            log.info("findByIntegerArr: {}", userService.findByIntegerArr());
+            log.info("findByLongArr: {}", userService.findByLongArr());
+            log.info("findByLongArr: {}", userService.findByLongIArr(new int[]{134,12341234,2342}));
+            List<User> userList = userService.findByUserList();
+            log.info("findByLongArr: {}", userList.get(0).getUsername());
         };
     }
 }
