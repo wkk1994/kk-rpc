@@ -3,6 +3,8 @@ package com.wkk.learn.kk.rpc.demo.provider;
 import com.wkk.demo.kk.rpc.api.User;
 import com.wkk.demo.kk.rpc.api.UserService;
 import com.wkk.learn.kk.rpc.code.annotation.KkProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,12 +19,14 @@ import java.util.List;
 @Component
 public class UserServiceImpl implements UserService {
 
+    @Autowired
+    Environment environment;
     @Override
     public User findById(int id) {
         if(id == 404) {
             throw new RuntimeException("Not Found");
         }
-        return new User(id, "KK-" + System.currentTimeMillis());
+        return new User(id, environment.getProperty("server.port") + "-KK-" + System.currentTimeMillis());
     }
 
     @Override

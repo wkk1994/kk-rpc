@@ -1,10 +1,16 @@
 package com.wkk.learn.kk.rpc.code.consumer;
 
 import com.wkk.learn.kk.rpc.code.annotation.KkConsumer;
+import com.wkk.learn.kk.rpc.code.api.Filter;
+import com.wkk.learn.kk.rpc.code.api.LoadBalancer;
+import com.wkk.learn.kk.rpc.code.api.Router;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
@@ -19,8 +25,13 @@ import java.util.stream.Collectors;
  * @date 2024/3/12 22:45
  */
 @Slf4j
-public class ConsumerBootstrap implements ApplicationContextAware {
+public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
 
+    @Autowired
+    private Router router;
+    private Environment environment;
+    @Autowired
+    private LoadBalancer loadBalancer;
     private ApplicationContext applicationContext;
 
     private Map<String, Object> stub = new HashMap<>();
@@ -62,7 +73,9 @@ public class ConsumerBootstrap implements ApplicationContextAware {
     }
 
     private Object createConsumer(Class<?> service) {
-        return Proxy.newProxyInstance(service.getClassLoader(), new Class[]{service}, new ConsumerInvocationHandler(service));
+        String urls = environment.getProperty("provider.urls");
+        assert urls != null;
+        return Proxy.newProxyInstance(service.getClassLoader(), new Class[]{service}, new ConsumerInvocationHandler(service, router, loadBalancer, List.of(urls.split(","))));
     }
 
     /**
@@ -83,5 +96,10 @@ public class ConsumerBootstrap implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 }

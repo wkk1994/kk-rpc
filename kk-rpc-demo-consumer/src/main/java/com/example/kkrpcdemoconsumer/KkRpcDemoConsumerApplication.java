@@ -7,6 +7,7 @@ import com.wkk.demo.kk.rpc.api.UserService;
 import com.wkk.learn.kk.rpc.code.annotation.KkConsumer;
 import com.wkk.learn.kk.rpc.code.consumer.ConsumerConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -50,8 +51,9 @@ public class KkRpcDemoConsumerApplication {
             log.info("findByIntegerArr: {}", userService.findByIntegerArr());
             log.info("findByLongArr: {}", userService.findByLongArr());
             log.info("findByLongArr: {}", userService.findByLongIArr(new int[]{134,12341234,2342}));
-            List<User> userList = userService.findByUserList();
-            log.info("findByLongArr: {}", userList.get(0).getUsername());
+//            List<User> userList = userService.findByUserList();
+//            log.info("findByLongArr: {}", userList.get(0).getUsername());
         };
     }
+
 }
