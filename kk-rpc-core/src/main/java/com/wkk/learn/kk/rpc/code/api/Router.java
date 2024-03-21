@@ -7,9 +7,9 @@ import java.util.List;
  * @author Wangkunkun
  * @date 2024/3/21 21:33
  */
-public interface Router {
+public interface Router<T> {
 
-    List<String> choose(List<String> providers);
+    List<T> choose(List<T> providers);
 
     Router DEFAULT = providers -> providers;
 }

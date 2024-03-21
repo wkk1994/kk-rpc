@@ -10,15 +10,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Wangkunkun
  * @date 2024/3/21 21:40
  */
-public class RoundRobinLoadBalancer implements LoadBalancer {
+public class RoundRobinLoadBalancer<T> implements LoadBalancer<T> {
 
-    private AtomicInteger integer = new AtomicInteger(0);
+    private AtomicInteger index = new AtomicInteger(0);
 
     @Override
-    public String choose(List<String> providers) {
+    public T choose(List<T> providers) {
         if(providers == null || providers.isEmpty()) {
             return null;
         }
-        return providers.get((integer.getAndIncrement() & 0x7fffffff) % providers.size());
+        return providers.get((index.getAndIncrement() & 0x7fffffff) % providers.size());
     }
 }

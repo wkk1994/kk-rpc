@@ -6,6 +6,7 @@ import com.wkk.learn.kk.rpc.code.RpcRequest;
 import com.wkk.learn.kk.rpc.code.RpcResponse;
 import com.wkk.learn.kk.rpc.code.api.LoadBalancer;
 import com.wkk.learn.kk.rpc.code.api.Router;
+import com.wkk.learn.kk.rpc.code.api.RpcContext;
 import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
 import com.wkk.learn.kk.rpc.code.meta.TypeUtil;
 import lombok.Data;
@@ -30,14 +31,12 @@ import static okhttp3.OkHttpClient.*;
 public class ConsumerInvocationHandler implements InvocationHandler {
 
     private Class service;
-    private Router router;
-    private LoadBalancer loadBalancer;
+    private RpcContext rpcContext;
     private List<String> providers;
 
-    public ConsumerInvocationHandler(Class service, Router router, LoadBalancer loadBalancer, List<String> providers) {
+    public ConsumerInvocationHandler(Class<?> service, RpcContext rpcContext, List<String> providers) {
         this.service = service;
-        this.router = router;
-        this.loadBalancer = loadBalancer;
+        this.rpcContext = rpcContext;
         this.providers = providers;
     }
 
@@ -45,9 +44,9 @@ public class ConsumerInvocationHandler implements InvocationHandler {
             .readTimeout(Duration.ofSeconds(10)).callTimeout(Duration.ofSeconds(10)).build();
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        List<String> urls = router.choose(providers);
-        String chooseUrl = loadBalancer.choose(urls);
-        RpcResponse post = post(method, args, chooseUrl);
+        List<String> urls = rpcContext.getRouter().choose(providers);
+        Object chooseUrl = rpcContext.getLoadBalancer().choose(urls);
+        RpcResponse post = post(method, args, chooseUrl.toString());
         if(post.isSuccess()) {
             Object data = post.getData();
             try {

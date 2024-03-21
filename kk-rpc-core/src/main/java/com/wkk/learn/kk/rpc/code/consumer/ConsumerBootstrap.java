@@ -1,9 +1,7 @@
 package com.wkk.learn.kk.rpc.code.consumer;
 
 import com.wkk.learn.kk.rpc.code.annotation.KkConsumer;
-import com.wkk.learn.kk.rpc.code.api.Filter;
-import com.wkk.learn.kk.rpc.code.api.LoadBalancer;
-import com.wkk.learn.kk.rpc.code.api.Router;
+import com.wkk.learn.kk.rpc.code.api.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +35,13 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     private Map<String, Object> stub = new HashMap<>();
 
     public void start() {
+        Map<String, Filter> filterMap = applicationContext.getBeansOfType(Filter.class);
+        Router router = applicationContext.getBean(Router.class);
+        LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
+        RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
+
+        RpcContext rpcContext = new RpcContext(new ArrayList<>(filterMap.values()), router, loadBalancer);
+
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         Arrays.stream(beanDefinitionNames).forEach(beanDefinitionName -> {
             Object bean = applicationContext.getBean(beanDefinitionName);
@@ -45,7 +50,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
                 return;
             }
             for (Field field : fieldList) {
-                Object fieldInstance = getConsumer(field);
+                Object fieldInstance = createConsumerFromRegistry(field, rpcContext, registryCenter);
                 field.setAccessible(true);
                 try {
                     field.set(bean, fieldInstance);
@@ -59,23 +64,25 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     /**
      * 生产代理类
      * @param field
+     * @param rpcContext
+     * @param registryCenter
      * @return
      */
-    private Object getConsumer(Field field) {
+    private Object createConsumerFromRegistry(Field field, RpcContext rpcContext, RegistryCenter registryCenter) {
         Class<?> service = field.getType();
         String serviceName = service.getCanonicalName();
+        List<String> providers = registryCenter.fetchAll(serviceName);
+
         Object consumer = stub.get(serviceName);
         if(consumer == null) {
-            consumer = createConsumer(service);
+            consumer = createConsumer(service, rpcContext, providers);
             stub.put(serviceName, consumer);
         }
         return consumer;
     }
 
-    private Object createConsumer(Class<?> service) {
-        String urls = environment.getProperty("provider.urls");
-        assert urls != null;
-        return Proxy.newProxyInstance(service.getClassLoader(), new Class[]{service}, new ConsumerInvocationHandler(service, router, loadBalancer, List.of(urls.split(","))));
+    private Object createConsumer(Class<?> service, RpcContext rpcContext, List<String> providers) {
+        return Proxy.newProxyInstance(service.getClassLoader(), new Class[]{service}, new ConsumerInvocationHandler(service, rpcContext, providers));
     }
 
     /**

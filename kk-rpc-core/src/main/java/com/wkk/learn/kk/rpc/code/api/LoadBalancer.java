@@ -7,9 +7,9 @@ import java.util.List;
  * @author Wangkunkun
  * @date 2024/3/21 21:34
  */
-public interface LoadBalancer {
+public interface LoadBalancer<T> {
 
-    String choose(List<String> providers);
+    T choose(List<T> providers);
 
     LoadBalancer DEFAULT = (providers) -> {
         if (providers == null || providers.isEmpty()) {

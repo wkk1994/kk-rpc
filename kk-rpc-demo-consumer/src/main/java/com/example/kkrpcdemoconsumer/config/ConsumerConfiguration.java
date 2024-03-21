@@ -1,6 +1,7 @@
 package com.example.kkrpcdemoconsumer.config;
 
 import com.wkk.learn.kk.rpc.code.api.LoadBalancer;
+import com.wkk.learn.kk.rpc.code.api.RegistryCenter;
 import com.wkk.learn.kk.rpc.code.api.Router;
 import com.wkk.learn.kk.rpc.code.cluster.RandomLoadBalancer;
 import com.wkk.learn.kk.rpc.code.cluster.RoundRobinLoadBalancer;
@@ -22,16 +23,21 @@ import java.util.List;
 @Configuration
 public class ConsumerConfiguration {
 
-//    @Value("#{${provider.urls:\"http://127.0.0.1:8081,http://127.0.0.1:8082\"}}")
+    @Value("#{${provider.urls:\"http://127.0.0.1:8081,http://127.0.0.1:8082\"}}")
     private List<String> providers;
 
     @Bean
-    public Router router() {
+    public Router<String> router() {
         return Router.DEFAULT;
     }
 
     @Bean
-    public LoadBalancer loadBalancer() {
-        return new RoundRobinLoadBalancer();
+    public LoadBalancer<String> loadBalancer() {
+        return new RoundRobinLoadBalancer<String>();
+    }
+
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public RegistryCenter registryCenter() {
+        return new RegistryCenter.StaticRegistryCenter(this.providers);
     }
 }
