@@ -72,7 +72,10 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         Class<?> service = field.getType();
         String serviceName = service.getCanonicalName();
         List<String> providers = registryCenter.fetchAll(serviceName);
-
+        if(providers != null) {
+            providers = providers.stream().map(node -> "http://" + node.replaceFirst("_", ":"))
+                    .collect(Collectors.toList());
+        }
         Object consumer = stub.get(serviceName);
         if(consumer == null) {
             consumer = createConsumer(service, rpcContext, providers);
