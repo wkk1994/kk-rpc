@@ -2,6 +2,7 @@ package com.wkk.learn.kk.rpc.code.consumer;
 
 import com.wkk.learn.kk.rpc.code.annotation.KkConsumer;
 import com.wkk.learn.kk.rpc.code.api.*;
+import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,17 +72,26 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     private Object createConsumerFromRegistry(Field field, RpcContext rpcContext, RegistryCenter registryCenter) {
         Class<?> service = field.getType();
         String serviceName = service.getCanonicalName();
-        List<String> providers = registryCenter.fetchAll(serviceName);
-        if(providers != null) {
-            providers = providers.stream().map(node -> "http://" + node.replaceFirst("_", ":"))
-                    .collect(Collectors.toList());
-        }
+        List<String> nodes = registryCenter.fetchAll(serviceName);
+        List<String> providers = formatUrl(nodes);
+        registryCenter.subscribe(serviceName, (changeEvent) -> {
+            providers.clear();
+            providers.addAll(formatUrl(changeEvent.getNodes()));
+        });
         Object consumer = stub.get(serviceName);
         if(consumer == null) {
             consumer = createConsumer(service, rpcContext, providers);
             stub.put(serviceName, consumer);
         }
         return consumer;
+    }
+
+    private List<String> formatUrl(List<String> nodes) {
+        if(nodes != null) {
+            return nodes.stream().map(node -> "http://" + node.replaceFirst("_", ":"))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     private Object createConsumer(Class<?> service, RpcContext rpcContext, List<String> providers) {

@@ -1,4 +1,4 @@
-package com.wkk.learn.kk.rpc.code.api;
+package com.wkk.learn.kk.rpc.code.register;
 
 import java.util.List;
 
@@ -18,6 +18,7 @@ public interface RegistryCenter {
     void unregister(String service, String instance);
 
     List<String> fetchAll(String service);
+    void subscribe(String service, ChangeListener changeListener);
 
     class StaticRegistryCenter implements RegistryCenter {
 
@@ -50,6 +51,11 @@ public interface RegistryCenter {
         @Override
         public List<String> fetchAll(String service) {
             return this.providers;
+        }
+
+        @Override
+        public void subscribe(String service, ChangeListener changeListener) {
+
         }
     }
 }

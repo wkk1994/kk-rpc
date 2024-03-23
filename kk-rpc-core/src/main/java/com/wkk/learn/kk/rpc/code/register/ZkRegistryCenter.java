@@ -1,9 +1,10 @@
-package com.wkk.learn.kk.rpc.code.api;
+package com.wkk.learn.kk.rpc.code.register;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
@@ -77,6 +78,24 @@ public class ZkRegistryCenter implements RegistryCenter{
             List<String> nodes = this.client.getChildren().forPath(servicePath);
             log.info("zookeeper registry fetch node : {}", nodes);
             return nodes;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void subscribe(String service, ChangeListener changeListener) {
+        log.info("zookeeper subscribe...");
+        // zk树结构监听，最大深度设置为2
+        TreeCache cache = TreeCache.newBuilder(client, "/" + service)
+                .setCacheData(true).setMaxDepth(2).build();
+        cache.getListenable().addListener((curatorFramework, event) -> {
+            log.info("zookeeper node change: {}", event);
+            List<String> nodes = fetchAll(service);
+            changeListener.fire(new ChangeEvent(nodes));
+        });
+        try {
+            cache.start();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

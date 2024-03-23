@@ -1,10 +1,9 @@
 package com.example.kkrpcdemoconsumer.config;
 
 import com.wkk.learn.kk.rpc.code.api.LoadBalancer;
-import com.wkk.learn.kk.rpc.code.api.RegistryCenter;
+import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
 import com.wkk.learn.kk.rpc.code.api.Router;
-import com.wkk.learn.kk.rpc.code.api.ZkRegistryCenter;
-import com.wkk.learn.kk.rpc.code.cluster.RandomLoadBalancer;
+import com.wkk.learn.kk.rpc.code.register.ZkRegistryCenter;
 import com.wkk.learn.kk.rpc.code.cluster.RoundRobinLoadBalancer;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
