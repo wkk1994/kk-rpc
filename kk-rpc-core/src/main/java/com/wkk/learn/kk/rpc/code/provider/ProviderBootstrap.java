@@ -7,6 +7,8 @@ import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
 import com.wkk.learn.kk.rpc.code.meta.MethodDesc;
 import com.wkk.learn.kk.rpc.code.meta.ServiceDesc;
 import com.wkk.learn.kk.rpc.code.meta.TypeUtil;
+import jakarta.annotation.PreDestroy;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +26,11 @@ import java.util.Map;
  * @date 2024/3/12 22:45
  */
 @Slf4j
+@Data
 public class ProviderBootstrap implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
+    private RegistryCenter registryCenter;
 
     private Map<String, ServiceDesc> skeleton = new HashMap<>();
 
@@ -38,6 +42,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
      * 构建生产者
      */
     public void start() {
+        registryCenter = applicationContext.getBean(RegistryCenter.class);
+        registryCenter.start();
         Map<String, Object> beansWithAnnotation = applicationContext.getBeansWithAnnotation(KkProvider.class);
         beansWithAnnotation.values().forEach(this::getInterfaces);
         String ip = null;
@@ -57,40 +63,28 @@ public class ProviderBootstrap implements ApplicationContextAware {
         }
     }
 
+    @PreDestroy
+    public void stop() {
+        log.info("provider stop...");
+        this.skeleton.keySet().forEach(this::unregistryService);
+        registryCenter.stop();
+    }
+
     /**
      * 注册服务
      * @param serviceName
      */
     private void registryService(String serviceName) {
-        RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
         registryCenter.register(serviceName, this.instance);
     }
 
-    public RpcResponse invokeRequest(RpcRequest request) {
-        ServiceDesc serviceDesc = skeleton.get(request.getService());
-        if(serviceDesc == null) {
-            return RpcResponse.fail("Not Found Service");
-        }
-        Object invoke = null;
-        try {
-            MethodDesc methodDesc = serviceDesc.getMethods().get(request.getMethodSign());
-            if(methodDesc == null) {
-                return RpcResponse.fail("Not Found Method");
-            }
-            Object[] argTarget = null;
-            if(request.getArgs() != null) {
-                argTarget = new Object[request.getArgs().length];
-                for (int i = 0; i < request.getArgs().length; i++) {
-                    argTarget[i] = TypeUtil.cast(request.getArgs()[i], methodDesc.getMethod().getParameterTypes()[i]);
-                }
-            }
-            invoke = methodDesc.getMethod().invoke(serviceDesc.getService(), argTarget);
-            return RpcResponse.success(invoke);
-        } catch (InvocationTargetException e) {
-            return RpcResponse.fail((Exception) e.getTargetException());
-        } catch (Exception e) {
-            return RpcResponse.fail(e);
-        }
+    /**
+     * 取消注册服务
+     * @param serviceName
+     */
+    private void unregistryService(String serviceName) {
+        RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
+        registryCenter.unregister(serviceName, this.instance);
     }
 
 

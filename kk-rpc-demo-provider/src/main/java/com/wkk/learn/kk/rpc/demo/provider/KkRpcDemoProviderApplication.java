@@ -5,6 +5,7 @@ import com.wkk.learn.kk.rpc.code.RpcResponse;
 import com.wkk.learn.kk.rpc.code.annotation.KkProvider;
 import com.wkk.learn.kk.rpc.code.provider.ProviderBootstrap;
 import com.wkk.learn.kk.rpc.code.provider.ProviderConfig;
+import com.wkk.learn.kk.rpc.code.provider.ProviderInvoke;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -28,7 +29,7 @@ import java.util.Map;
 public class KkRpcDemoProviderApplication {
 
     @Autowired
-    private ProviderBootstrap providerBootstrap;
+    private ProviderInvoke providerInvoke;
 
     public static void main(String[] args) {
         SpringApplication.run(KkRpcDemoProviderApplication.class, args);
@@ -39,7 +40,7 @@ public class KkRpcDemoProviderApplication {
 
     @RequestMapping("/")
     public RpcResponse invoke(@RequestBody RpcRequest request) {
-        return providerBootstrap.invokeRequest(request);
+        return providerInvoke.invoke(request);
     }
 
 

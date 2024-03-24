@@ -2,6 +2,7 @@ package com.wkk.learn.kk.rpc.code.consumer;
 
 import com.wkk.learn.kk.rpc.code.annotation.KkConsumer;
 import com.wkk.learn.kk.rpc.code.api.*;
+import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
 import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -46,7 +47,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         Arrays.stream(beanDefinitionNames).forEach(beanDefinitionName -> {
             Object bean = applicationContext.getBean(beanDefinitionName);
-            List<Field> fieldList = findConsumerField(bean.getClass());
+            List<Field> fieldList = MethodUtil.findAnnotationField(bean.getClass(), KkConsumer.class);
             if(CollectionUtils.isEmpty(fieldList)) {
                 return;
             }
@@ -96,21 +97,6 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createConsumer(Class<?> service, RpcContext rpcContext, List<String> providers) {
         return Proxy.newProxyInstance(service.getClassLoader(), new Class[]{service}, new ConsumerInvocationHandler(service, rpcContext, providers));
-    }
-
-    /**
-     * 查找有@KkConsumber注解的属性
-     * @param classz
-     * @return
-     */
-    private List<Field> findConsumerField(Class classz) {
-        List<Field> fieldList = new LinkedList<>();
-        while (classz != null) {
-            Field[] fields = classz.getDeclaredFields();
-            fieldList.addAll(Arrays.stream(fields).filter(field -> field.getAnnotation(KkConsumer.class) != null).collect(Collectors.toList()));
-            classz = classz.getSuperclass();
-        }
-        return fieldList;
     }
 
     @Override
