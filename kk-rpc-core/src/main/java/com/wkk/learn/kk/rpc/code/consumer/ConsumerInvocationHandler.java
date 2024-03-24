@@ -7,6 +7,8 @@ import com.wkk.learn.kk.rpc.code.RpcResponse;
 import com.wkk.learn.kk.rpc.code.api.LoadBalancer;
 import com.wkk.learn.kk.rpc.code.api.Router;
 import com.wkk.learn.kk.rpc.code.api.RpcContext;
+import com.wkk.learn.kk.rpc.code.consumer.http.HttpInvoke;
+import com.wkk.learn.kk.rpc.code.consumer.http.OkHttpInvoke;
 import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
 import com.wkk.learn.kk.rpc.code.meta.TypeUtil;
 import lombok.Data;
@@ -33,6 +35,7 @@ public class ConsumerInvocationHandler implements InvocationHandler {
     private Class service;
     private RpcContext rpcContext;
     private List<String> providers;
+    private HttpInvoke httpInvoke = new OkHttpInvoke();
 
     public ConsumerInvocationHandler(Class<?> service, RpcContext rpcContext, List<String> providers) {
         this.service = service;
@@ -40,8 +43,7 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         this.providers = providers;
     }
 
-    private OkHttpClient client = new Builder().connectTimeout(Duration.ofSeconds(10))
-            .readTimeout(Duration.ofSeconds(10)).callTimeout(Duration.ofSeconds(10)).build();
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         List<String> urls = rpcContext.getRouter().choose(providers);
@@ -63,17 +65,11 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         throw post.getException();
     }
 
-    private RpcResponse post(Method method, Object[] args, String url) throws IOException {
+    private RpcResponse post(Method method, Object[] args, String url) {
         RpcRequest rpcRequest = new RpcRequest();
         rpcRequest.setMethodSign(MethodUtil.getMethodSign(method));
         rpcRequest.setArgs(args);
         rpcRequest.setService(service.getCanonicalName());
-        Request request = new Request.Builder()
-                .url(url)
-                .post(RequestBody.create(MediaType.get("application/json"), JSON.toJSONString(rpcRequest))).build();
-        ResponseBody body = client.newCall(request).execute().body();
-        String jsonStr = body.string();
-        log.info("result : {}", jsonStr);
-        return JSON.parseObject(jsonStr, RpcResponse.class);
+        return httpInvoke.post(rpcRequest, url);
     }
 }

@@ -1,16 +1,16 @@
 package com.wkk.learn.kk.rpc.code.consumer;
 
 import com.wkk.learn.kk.rpc.code.annotation.KkConsumer;
-import com.wkk.learn.kk.rpc.code.api.*;
+import com.wkk.learn.kk.rpc.code.api.Filter;
+import com.wkk.learn.kk.rpc.code.api.LoadBalancer;
+import com.wkk.learn.kk.rpc.code.api.Router;
+import com.wkk.learn.kk.rpc.code.api.RpcContext;
 import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
 import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
@@ -25,13 +25,8 @@ import java.util.stream.Collectors;
  * @date 2024/3/12 22:45
  */
 @Slf4j
-public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
+public class ConsumerBootstrap implements ApplicationContextAware {
 
-    @Autowired
-    private Router router;
-    private Environment environment;
-    @Autowired
-    private LoadBalancer loadBalancer;
     private ApplicationContext applicationContext;
 
     private Map<String, Object> stub = new HashMap<>();
@@ -104,8 +99,4 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         this.applicationContext = applicationContext;
     }
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
 }
