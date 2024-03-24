@@ -1,12 +1,10 @@
 package com.wkk.learn.kk.rpc.code.provider;
 
-import com.wkk.learn.kk.rpc.code.RpcRequest;
-import com.wkk.learn.kk.rpc.code.RpcResponse;
 import com.wkk.learn.kk.rpc.code.annotation.KkProvider;
+import com.wkk.learn.kk.rpc.code.meta.InstanceMeta;
+import com.wkk.learn.kk.rpc.code.meta.ServiceMeta;
 import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
-import com.wkk.learn.kk.rpc.code.meta.MethodDesc;
 import com.wkk.learn.kk.rpc.code.meta.ServiceDesc;
-import com.wkk.learn.kk.rpc.code.meta.TypeUtil;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -34,9 +31,15 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     private Map<String, ServiceDesc> skeleton = new HashMap<>();
 
-    private String instance;
+    private InstanceMeta instance;
     @Value("${server.port}")
-    private String port;
+    private Integer port;
+    @Value("${app.id}")
+    private String appId;
+    @Value("${app.namespace}")
+    private String appNamespace;
+    @Value("${app.env}")
+    private String appEnv;
 
     /**
      * 构建生产者
@@ -52,7 +55,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
-        this.instance = ip + "_" + port;
+        this.instance = new InstanceMeta("http", ip, port, "", null);
         skeleton.keySet().forEach(this::registryService);
     }
 
@@ -75,7 +78,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
      * @param serviceName
      */
     private void registryService(String serviceName) {
-        registryCenter.register(serviceName, this.instance);
+        ServiceMeta serviceMeta = new ServiceMeta(appId, appNamespace, appEnv, serviceName);
+        registryCenter.register(serviceMeta, this.instance);
     }
 
     /**
@@ -83,8 +87,9 @@ public class ProviderBootstrap implements ApplicationContextAware {
      * @param serviceName
      */
     private void unregistryService(String serviceName) {
+        ServiceMeta serviceMeta = new ServiceMeta(appId, appNamespace, appEnv, serviceName);
         RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
-        registryCenter.unregister(serviceName, this.instance);
+        registryCenter.unregister(serviceMeta, this.instance);
     }
 
 

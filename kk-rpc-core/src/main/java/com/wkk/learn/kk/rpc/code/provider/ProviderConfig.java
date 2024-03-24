@@ -1,7 +1,7 @@
 package com.wkk.learn.kk.rpc.code.provider;
 
 import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
-import com.wkk.learn.kk.rpc.code.register.ZkRegistryCenter;
+import com.wkk.learn.kk.rpc.code.register.zk.ZkRegistryCenter;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

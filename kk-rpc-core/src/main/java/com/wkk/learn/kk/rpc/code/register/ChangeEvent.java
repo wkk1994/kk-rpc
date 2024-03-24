@@ -1,5 +1,6 @@
 package com.wkk.learn.kk.rpc.code.register;
 
+import com.wkk.learn.kk.rpc.code.meta.InstanceMeta;
 import lombok.Data;
 
 import java.util.List;
@@ -12,9 +13,9 @@ import java.util.List;
 @Data
 public class ChangeEvent {
 
-    List<String> nodes;
+    List<InstanceMeta> nodes;
 
-    public ChangeEvent(List<String> nodes) {
+    public ChangeEvent(List<InstanceMeta> nodes) {
         this.nodes = nodes;
     }
 }

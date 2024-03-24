@@ -6,9 +6,12 @@ import com.wkk.learn.kk.rpc.code.api.LoadBalancer;
 import com.wkk.learn.kk.rpc.code.api.Router;
 import com.wkk.learn.kk.rpc.code.api.RpcContext;
 import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
+import com.wkk.learn.kk.rpc.code.meta.InstanceMeta;
+import com.wkk.learn.kk.rpc.code.meta.ServiceMeta;
 import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.CollectionUtils;
@@ -30,6 +33,13 @@ public class ConsumerBootstrap implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     private Map<String, Object> stub = new HashMap<>();
+
+    @Value("${app.id}")
+    private String appId;
+    @Value("${app.namespace}")
+    private String appNamespace;
+    @Value("${app.env}")
+    private String appEnv;
 
     public void start() {
         Map<String, Filter> filterMap = applicationContext.getBeansOfType(Filter.class);
@@ -68,11 +78,12 @@ public class ConsumerBootstrap implements ApplicationContextAware {
     private Object createConsumerFromRegistry(Field field, RpcContext rpcContext, RegistryCenter registryCenter) {
         Class<?> service = field.getType();
         String serviceName = service.getCanonicalName();
-        List<String> nodes = registryCenter.fetchAll(serviceName);
-        List<String> providers = formatUrl(nodes);
-        registryCenter.subscribe(serviceName, (changeEvent) -> {
+        ServiceMeta serviceMeta = new ServiceMeta(appId, appNamespace, appEnv, serviceName);
+        List<InstanceMeta> instanceMetas = registryCenter.fetchAll(serviceMeta);
+        List<String> providers = instanceMetas.stream().map(InstanceMeta::toUrl).collect(Collectors.toList());
+        registryCenter.subscribe(serviceMeta, (changeEvent) -> {
             providers.clear();
-            providers.addAll(formatUrl(changeEvent.getNodes()));
+            providers.addAll(changeEvent.getNodes().stream().map(InstanceMeta::toUrl).toList());
         });
         Object consumer = stub.get(serviceName);
         if(consumer == null) {
@@ -80,14 +91,6 @@ public class ConsumerBootstrap implements ApplicationContextAware {
             stub.put(serviceName, consumer);
         }
         return consumer;
-    }
-
-    private List<String> formatUrl(List<String> nodes) {
-        if(nodes != null) {
-            return nodes.stream().map(node -> "http://" + node.replaceFirst("_", ":"))
-                    .collect(Collectors.toList());
-        }
-        return Collections.emptyList();
     }
 
     private Object createConsumer(Class<?> service, RpcContext rpcContext, List<String> providers) {

@@ -1,5 +1,8 @@
 package com.wkk.learn.kk.rpc.code.register;
 
+import com.wkk.learn.kk.rpc.code.meta.InstanceMeta;
+import com.wkk.learn.kk.rpc.code.meta.ServiceMeta;
+
 import java.util.List;
 
 /**
@@ -13,18 +16,18 @@ public interface RegistryCenter {
 
     void stop();
 
-    void register(String service, String instance);
+    void register(ServiceMeta service, InstanceMeta instance);
 
-    void unregister(String service, String instance);
+    void unregister(ServiceMeta service, InstanceMeta instance);
 
-    List<String> fetchAll(String service);
-    void subscribe(String service, ChangeListener changeListener);
+    List<InstanceMeta> fetchAll(ServiceMeta service);
+    void subscribe(ServiceMeta service, ChangeListener changeListener);
 
     class StaticRegistryCenter implements RegistryCenter {
 
-        List<String> providers;
+        List<InstanceMeta> providers;
 
-        public StaticRegistryCenter(List<String> providers) {
+        public StaticRegistryCenter(List<InstanceMeta> providers) {
             this.providers = providers;
         }
 
@@ -39,22 +42,22 @@ public interface RegistryCenter {
         }
 
         @Override
-        public void register(String service, String instance) {
+        public void register(ServiceMeta service, InstanceMeta instance) {
 
         }
 
         @Override
-        public void unregister(String service, String instance) {
+        public void unregister(ServiceMeta service, InstanceMeta instance) {
 
         }
 
         @Override
-        public List<String> fetchAll(String service) {
+        public List<InstanceMeta> fetchAll(ServiceMeta service) {
             return this.providers;
         }
 
         @Override
-        public void subscribe(String service, ChangeListener changeListener) {
+        public void subscribe(ServiceMeta service, ChangeListener changeListener) {
 
         }
     }
