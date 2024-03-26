@@ -5,13 +5,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>kk-rpc-demo-api</module>
+        <module>kk-rpc-core</module>
+        <module>kk-rpc-demo-consumer</module>
+        <module>kk-rpc-demo-provider</module>
     </modules>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.3</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
     <groupId>com.wkk.learn</groupId>
     <artifactId>kk-rpc</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -19,6 +16,9 @@
     <description>重复造轮子—RPC</description>
     <properties>
         <java.version>17</java.version>
+        <spring.boot.version>3.2.3</spring.boot.version>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
     </properties>
 
     <dependencyManagement>
@@ -28,6 +28,13 @@
                 <artifactId>lombok</artifactId>
                 <version>1.18.30</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
