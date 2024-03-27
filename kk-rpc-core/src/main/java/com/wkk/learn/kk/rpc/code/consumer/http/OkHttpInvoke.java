@@ -27,6 +27,7 @@ public class OkHttpInvoke implements HttpInvoke{
                 .post(RequestBody.create(MediaType.get("application/json"), JSON.toJSONString(rpcRequest))).build();
         ResponseBody body = null;
         try {
+            log.info("url : {}", url);
             body = client.newCall(request).execute().body();
             String jsonStr = body.string();
             log.info("result : {}", jsonStr);

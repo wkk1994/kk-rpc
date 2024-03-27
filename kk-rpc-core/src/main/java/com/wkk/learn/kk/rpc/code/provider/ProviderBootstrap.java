@@ -5,6 +5,7 @@ import com.wkk.learn.kk.rpc.code.meta.InstanceMeta;
 import com.wkk.learn.kk.rpc.code.meta.ServiceMeta;
 import com.wkk.learn.kk.rpc.code.register.RegistryCenter;
 import com.wkk.learn.kk.rpc.code.meta.ServiceDesc;
+import com.wkk.learn.kk.rpc.code.util.NetUtil;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,13 +52,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
         registryCenter.start();
         Map<String, Object> beansWithAnnotation = applicationContext.getBeansWithAnnotation(KkProvider.class);
         beansWithAnnotation.values().forEach(this::getInterfaces);
-        String ip = null;
-        try {
-            ip = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-        this.instance = new InstanceMeta("http", ip, port, "", null);
+        this.instance = new InstanceMeta("http", NetUtil.getLocalHost(), port, "", null);
         skeleton.keySet().forEach(this::registryService);
     }
 

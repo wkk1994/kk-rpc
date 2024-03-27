@@ -15,6 +15,7 @@ public class ProviderConfig {
 
     @Bean
     public ProviderBootstrap providerBootstrap() {
+        System.out.println("3456789");
         return new ProviderBootstrap();
     }
 

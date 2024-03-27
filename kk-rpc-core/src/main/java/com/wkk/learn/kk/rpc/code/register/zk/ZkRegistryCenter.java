@@ -30,7 +30,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     public void start() {
         // 定义重试策略
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
-        client = CuratorFrameworkFactory.builder().connectString("127.0.0.1:2181")
+        client = CuratorFrameworkFactory.builder().connectString("127.0.0.1:2182")
                 .namespace("kk-rpc")
                 .retryPolicy(retryPolicy).build();
         client.start();
@@ -81,6 +81,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     public List<InstanceMeta> fetchAll(ServiceMeta service) {
         String servicePath = "/" + service.toPath();
         try {
+            log.error("fetchAll servicePath: {}", servicePath);
             List<String> nodes = this.client.getChildren().forPath(servicePath);
             log.info("zookeeper registry fetch node : {}", nodes);
             if(nodes == null) {
@@ -88,6 +89,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             }
             return nodes.stream().map(node -> InstanceMeta.mapByHttp(node)).collect(Collectors.toList());
         } catch (Exception e) {
+            log.error("fetchAll error", e);
             throw new RuntimeException(e);
         }
     }

@@ -9,6 +9,7 @@ import com.wkk.learn.kk.rpc.code.api.Router;
 import com.wkk.learn.kk.rpc.code.api.RpcContext;
 import com.wkk.learn.kk.rpc.code.consumer.http.HttpInvoke;
 import com.wkk.learn.kk.rpc.code.consumer.http.OkHttpInvoke;
+import com.wkk.learn.kk.rpc.code.ex.RpcException;
 import com.wkk.learn.kk.rpc.code.meta.MethodUtil;
 import com.wkk.learn.kk.rpc.code.meta.TypeUtil;
 import lombok.Data;
@@ -60,9 +61,14 @@ public class ConsumerInvocationHandler implements InvocationHandler {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }else {
+            log.error("invoke error", post.getException());
+            if(post.getException() instanceof RpcException) {
+                throw post.getException();
+            }
+            throw new RpcException();
         }
-        log.error("invoke error", post.getException());
-        throw post.getException();
+        return post.getException();
     }
 
     private RpcResponse post(Method method, Object[] args, String url) {
