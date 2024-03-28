@@ -46,7 +46,6 @@ public class NetUtil {
      */
     private static Optional<InetAddress> getLocalAddress0(List<NetworkInterface> networkInterfaces) {
         InetAddress result = null;
-        // TODO 为啥要这样判断？
         for (NetworkInterface networkInterface : networkInterfaces) {
             Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
             while (inetAddresses.hasMoreElements()) {

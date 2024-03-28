@@ -2,6 +2,7 @@ package com.wkk.learn.kk.rpc.code.provider;
 
 import com.wkk.learn.kk.rpc.code.RpcRequest;
 import com.wkk.learn.kk.rpc.code.RpcResponse;
+import com.wkk.learn.kk.rpc.code.ex.RpcException;
 import com.wkk.learn.kk.rpc.code.meta.MethodDesc;
 import com.wkk.learn.kk.rpc.code.meta.ServiceDesc;
 import com.wkk.learn.kk.rpc.code.meta.TypeUtil;
@@ -44,9 +45,13 @@ public class ProviderInvoke {
             invoke = methodDesc.getMethod().invoke(serviceDesc.getService(), argTarget);
             return RpcResponse.success(invoke);
         } catch (InvocationTargetException e) {
-            return RpcResponse.fail((Exception) e.getTargetException());
+            Throwable targetException = e.getTargetException();
+            if(targetException != null && targetException instanceof RpcException) {
+                return RpcResponse.fail((RpcException) targetException);
+            }
+            return RpcResponse.fail(new RpcException(e.getTargetException(), RpcException.INVOKE_ERROR));
         } catch (Exception e) {
-            return RpcResponse.fail(e);
+            return RpcResponse.fail(new RpcException(e, RpcException.INVOKE_ERROR));
         }
     }
 }

@@ -37,7 +37,12 @@ public class KkRpcDemoConsumerApplication {
         return x -> {
             User user = userService.findById(101, "1234");
             log.info("findById: {}", user);
-            User user1 = userService.findById(101);
+            User user1 = null;
+            try {
+                user1 = userService.findById(404);
+            } catch (Exception e) {
+                log.error("error" , e);
+            }
             log.info("findById: {}", user1);
             User user2 = userService.findById(101L, "longlong");
             log.info("findById: {}", user2);

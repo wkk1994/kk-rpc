@@ -30,7 +30,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     public void start() {
         // 定义重试策略
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
-        client = CuratorFrameworkFactory.builder().connectString("127.0.0.1:2182")
+        client = CuratorFrameworkFactory.builder().connectString("127.0.0.1:2181")
                 .namespace("kk-rpc")
                 .retryPolicy(retryPolicy).build();
         client.start();

@@ -3,6 +3,7 @@ package com.wkk.learn.kk.rpc.code.consumer.http;
 import com.alibaba.fastjson.JSON;
 import com.wkk.learn.kk.rpc.code.RpcRequest;
 import com.wkk.learn.kk.rpc.code.RpcResponse;
+import com.wkk.learn.kk.rpc.code.ex.RpcException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
@@ -33,7 +34,7 @@ public class OkHttpInvoke implements HttpInvoke{
             log.info("result : {}", jsonStr);
             return JSON.parseObject(jsonStr, RpcResponse.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e, RpcException.INVOKE_ERROR);
         }
     }
 }

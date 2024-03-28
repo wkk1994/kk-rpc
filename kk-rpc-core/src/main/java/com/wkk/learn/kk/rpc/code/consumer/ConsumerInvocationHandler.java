@@ -49,7 +49,15 @@ public class ConsumerInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         List<String> urls = rpcContext.getRouter().choose(providers);
         Object chooseUrl = rpcContext.getLoadBalancer().choose(urls);
-        RpcResponse post = post(method, args, chooseUrl.toString());
+        RpcResponse post = null;
+        try {
+            post = post(method, args, chooseUrl.toString());
+        } catch (RpcException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("invoke error", e);
+            throw new RpcException(e, RpcException.INVOKE_ERROR);
+        }
         if(post.isSuccess()) {
             Object data = post.getData();
             try {
@@ -59,16 +67,12 @@ public class ConsumerInvocationHandler implements InvocationHandler {
                     return TypeUtil.cast(data, method.getReturnType());
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RpcException(e, RpcException.TYPE_CAST_ERROR);
             }
         }else {
             log.error("invoke error", post.getException());
-            if(post.getException() instanceof RpcException) {
-                throw post.getException();
-            }
-            throw new RpcException();
+            throw post.getException();
         }
-        return post.getException();
     }
 
     private RpcResponse post(Method method, Object[] args, String url) {

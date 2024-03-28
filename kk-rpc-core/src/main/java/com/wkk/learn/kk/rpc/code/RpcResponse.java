@@ -1,5 +1,6 @@
 package com.wkk.learn.kk.rpc.code;
 
+import com.wkk.learn.kk.rpc.code.ex.RpcException;
 import lombok.*;
 
 /**
@@ -24,7 +25,7 @@ public class RpcResponse<T> {
     private boolean success;
 
 
-    private Exception exception;
+    private RpcException exception;
 
     /**
      * 返回数据
@@ -39,7 +40,7 @@ public class RpcResponse<T> {
         return RpcResponse.builder().code(-1).success(false).data(errorMsg).build();
     }
 
-    public static RpcResponse fail(Exception exception) {
+    public static RpcResponse fail(RpcException exception) {
         return RpcResponse.builder().code(-1).success(false).data(exception.getMessage()).exception(exception).build();
     }
 }
