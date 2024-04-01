@@ -20,6 +20,8 @@ import java.util.List;
 @Component
 public class UserServiceImpl implements UserService {
 
+    private int timeOut;
+
     @Autowired
     Environment environment;
     @SneakyThrows
@@ -28,7 +30,9 @@ public class UserServiceImpl implements UserService {
         if(id == 404) {
             throw new RuntimeException("Not Found");
         }
-        Thread.sleep(100000);
+        if(timeOut > 0) {
+            Thread.sleep(timeOut * 500L);
+        }
         return new User(id, environment.getProperty("server.port") + "-KK-" + System.currentTimeMillis());
     }
 
@@ -112,5 +116,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findByUserList(List<User> users) {
         return users;
+    }
+
+    @SneakyThrows
+    @Override
+    public User setTimeOut(int timeOut) {
+        this.timeOut = timeOut;
+        return new User(timeOut, environment.getProperty("server.port") + "-KK-" + System.currentTimeMillis());
     }
 }

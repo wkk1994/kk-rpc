@@ -19,7 +19,7 @@ import java.time.Duration;
 public class OkHttpInvoke implements HttpInvoke{
 
     private OkHttpClient client = new OkHttpClient.Builder().connectTimeout(Duration.ofSeconds(10))
-            .readTimeout(Duration.ofSeconds(10)).callTimeout(Duration.ofSeconds(10)).build();
+            .readTimeout(Duration.ofSeconds(1)).callTimeout(Duration.ofSeconds(10)).build();
 
     @Override
     public RpcResponse post(RpcRequest rpcRequest, String url) {

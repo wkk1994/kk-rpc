@@ -110,4 +110,9 @@ public class UserServiceImpl implements UserService {
     public List<User> findByUserList(List<User> users) {
         return users;
     }
+
+    @Override
+    public User setTimeOut(int timeOut) {
+        return null;
+    }
 }

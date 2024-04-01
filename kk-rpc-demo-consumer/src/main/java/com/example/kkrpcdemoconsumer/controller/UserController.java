@@ -20,7 +20,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/")
-    public User getById(@RequestParam Integer id) {
+    public User getById(@RequestParam(name = "id") Integer id) {
         return userService.findById(id);
     }
 }

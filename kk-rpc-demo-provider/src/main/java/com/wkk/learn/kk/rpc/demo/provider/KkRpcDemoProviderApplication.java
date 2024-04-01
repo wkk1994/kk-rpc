@@ -1,5 +1,6 @@
 package com.wkk.learn.kk.rpc.demo.provider;
 
+import com.wkk.demo.kk.rpc.api.User;
 import com.wkk.learn.kk.rpc.code.RpcRequest;
 import com.wkk.learn.kk.rpc.code.RpcResponse;
 import com.wkk.learn.kk.rpc.code.annotation.KkProvider;
@@ -14,9 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,6 +30,9 @@ public class KkRpcDemoProviderApplication {
     @Autowired
     private ProviderInvoke providerInvoke;
 
+    @Autowired
+    private UserServiceImpl userService;
+
     public static void main(String[] args) {
         SpringApplication.run(KkRpcDemoProviderApplication.class, args);
     }
@@ -41,6 +43,11 @@ public class KkRpcDemoProviderApplication {
     @RequestMapping("/")
     public RpcResponse invoke(@RequestBody RpcRequest request) {
         return providerInvoke.invoke(request);
+    }
+
+    @PostMapping("/set-time-out")
+    public User setTimeOut(@RequestParam(name = "timeOut") int timeOut) {
+        return userService.setTimeOut(timeOut);
     }
 
 

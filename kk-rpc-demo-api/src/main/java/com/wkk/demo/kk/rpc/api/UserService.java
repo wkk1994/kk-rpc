@@ -1,5 +1,7 @@
 package com.wkk.demo.kk.rpc.api;
 
+import lombok.SneakyThrows;
+
 import java.util.List;
 
 /**
@@ -28,4 +30,7 @@ public interface UserService {
     int[] findByLongIArr(int[] arr);
     List<User> findByUserList();
     List<User> findByUserList(List<User> users);
+
+    @SneakyThrows
+    User setTimeOut(int timeOut);
 }
