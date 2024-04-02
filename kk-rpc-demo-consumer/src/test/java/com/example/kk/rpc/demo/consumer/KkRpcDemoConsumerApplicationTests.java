@@ -1,8 +1,8 @@
 package com.example.kk.rpc.demo.consumer;
 
-import com.example.kk.rpc.demo.provider.KkRpcDemoProviderApplication;
 import com.example.kk.rpc.demo.zk.ZookeeperServer;
 import com.example.kkrpcdemoconsumer.KkRpcDemoConsumerApplication;
+import com.wkk.learn.kk.rpc.demo.provider.KkRpcDemoProviderApplication;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
